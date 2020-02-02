@@ -1,0 +1,94 @@
+﻿<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  Enter or paste JSON here and press Show
+  <div>
+    <textarea id="jsonData" style="width: 50em; height: 10%; max-width: 100%"></textarea>
+    <button onclick="showJsonData()">Show</button>
+    <span id="parseError" style="color: darkred;"></span>
+  </div>
+  <script type="text/javascript">
+    function showJsonData() {
+      var json;
+      try {
+        json = JSON.parse(document.getElementById('jsonData').value);
+        document.getElementById('parseError').textContent = '';
+      }
+      catch (e) {
+        document.getElementById('parseError').textContent = e.message;
+        return;
+      }
+      var tree = createJsonTreeDom(json);
+      var holder = document.getElementById('test');
+      holder.removeChild(holder.querySelector('*'));
+      holder.appendChild(tree);
+    }
+  </script>
+  <p>It can handle relatively large JSONs.</p>
+  <p>Hover strings with escaped symbols (<code>\" \\ \b \f \n \r \t \uhhhh</code>) to see a tooltip with contents in human readable form.</p>
+  <p>
+    Filtering:
+    <ul>
+      <li>enter regex to filter items</li>
+      <li>press "Expand filtered items" button or <code>Enter</code> while editing to expand filtered items and exit filtering mode</li>
+    </ul>
+  </p>
+  <div>
+    <button onclick="for (var e of document.querySelectorAll('#test li.folder')) e.classList.remove('folded')">Expand all</button>
+    <button onclick="for (var e of document.querySelectorAll('#test li.folder')) e.classList.add('folded')">Collapse all</button>
+    <button onclick="for (var e of document.querySelectorAll('#test .tree > ul > li.folder')) e.classList.remove('folded')">Expand level 1</button>
+    <button onclick="for (var e of document.querySelectorAll('#test .tree > ul > li.folder')) e.classList.add('folded')">Collapse level 1</button>
+  </div>
+  <div>
+    <label for="filter">Filter:</label>
+    <input id="filter" type="text" placeholder="enter regex"
+           oninput="filter(this.value)"
+           onkeypress="if (event.key == 'Enter') exapandFilteredItems(document.getElementById('test'))" />
+    <button onclick="exapandFilteredItems(document.getElementById('test'))">Expand filtered items</button>
+    <span id="regexpError" style="color: darkred;"></span>
+    <script type="text/javascript">
+      function filter(pattern) {
+        var errorMsgElement = document.getElementById('regexpError');
+        errorMsgElement.textContent = '';
+        filterItems(pattern, document.getElementById('test'), errorMsg => errorMsgElement.textContent = errorMsg);
+      }
+    </script>
+  </div>
+  <div id="test" style="margin: 1em; border: 1px solid gray;"></div>
+
+  <script type="text/javascript" src="scripts.js"></script>
+  <script type="text/javascript">
+    var json = {
+      "null": null,
+      "boolean": true,
+      "number 1": 1,
+      "number 2": 1.5,
+      "string": "bleh!",
+      "escaped string": "blah blah\n\ttabbed text\n\"\\\nblah\ntext\bbackspace\ntext\fform feed\ntext\rcarriage return\nunicode text: \u20AC \u00A3 \u00A5",
+      "JSON escapes and HTML symbols": "html special symbols:\n&<>'\"",
+      "object": {
+        "value 1": 42,
+        "value 2": 3.14592654,
+        "value 3": "foobar",
+        "subobject": {
+          "value1": 1,
+          "value2": 2,
+          "value3": 3
+        },
+        "long string with formatting": "text\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext\ntext"
+      },
+      "array": [
+        1, 2, 3.3, "string", { "value": 42 }
+      ],
+      "a": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,]
+    };
+
+    var tree = createJsonTreeDom(json);
+    document.getElementById('test').appendChild(tree);
+  </script>
+</body>
+</html>

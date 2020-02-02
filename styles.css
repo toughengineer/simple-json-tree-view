@@ -1,0 +1,123 @@
+.tree {
+  font-family: "Courier New", Courier, monospace;
+  white-space: nowrap;
+}
+
+  .tree ul {
+    list-style-type: none;
+    padding: 0;
+    margin-left: 3em;
+    margin-top: 0;
+    margin-bottom: 0;
+    counter-reset: childIndex;
+  }
+
+  .tree li:not(:first-child) {
+    counter-increment: childIndex;
+  }
+
+  .tree:not(.filter) li::before {
+    content: counter(childIndex);
+    color: lightgray;
+    text-align: right;
+    display: inline-block;
+    min-width: 2.5em;
+    margin-left: -3em;
+    padding-right: 0.5em;
+  }
+
+  .tree:not(.filter) li.folded > span.numberOfElements::before {
+    content: attr(data-item-count);
+    display: inline-block;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    color: gray;
+  }
+
+  .tree li > div.key {
+    display: inline;
+  }
+
+    .tree li > div.key > span {
+      color: darkslateblue;
+    }
+
+      .tree li > div.key > span:hover {
+        background-color: lightblue;
+      }
+
+  .tree li.folder.folded > ul {
+    display: none;
+  }
+
+  .tree:not(.filter) li.folder > div.key > span::before {
+    content: "\2212";
+    opacity: 0.33;
+    color: #111;
+    background-color: #e0eaef;
+    text-align: center;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-left: -2.9em;
+    margin-right: 1.9em;
+    cursor: pointer;
+    border-radius: 0.2em;
+  }
+
+  .tree:not(.filter) li.folder.folded > div.key > span::before {
+    content: "+";
+  }
+
+  .tree li.folder > div.key:hover > span::before {
+    opacity: 1;
+  }
+
+  .tree .nullValue {
+    color: gray;
+    font-weight: bold;
+  }
+
+  .tree .numericValue {
+    color: darkblue;
+    font-weight: bold;
+  }
+
+  .tree .stringValue {
+    color: brown;
+    font-weight: bold;
+  }
+
+  .tree span > span.tooltip {
+    visibility: hidden;
+    color: #111;
+    background-color: #fefefe;
+    font-weight: normal;
+    position: absolute;
+    border: 1px solid gray;
+    margin-top: 1.5em;
+    padding: 0.5em;
+    white-space: pre;
+    transition-delay: 0.1s;
+  }
+
+  .tree span:hover > span.tooltip, span.tooltip:hover {
+    visibility: visible;
+    transition-delay: 0.2s;
+  }
+
+  .tree.filter li.folder.folded > ul {
+    display: block;
+  }
+
+  .tree.filter li {
+    display: none;
+  }
+
+    .tree.filter li.filterShow {
+      display: block;
+    }
+
+  .tree mark {
+    background-color: gold;
+  }
