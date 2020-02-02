@@ -2,7 +2,7 @@
 See [demo](https://toughengineer.github.io/simple-json-tree-view/).
 
 This is a simple JSON tree view.
-It has no external dependecies, just plain JavaScript+CSS, it works good in recent Chrome (also tested in Edge)
+It has no external dependecies, just plain JavaScript+CSS, it works good in recent Chrome (also tested in Edge).
 
 Though it is simple, I implemented few capabilities:
 * expaning/collapsing tree items,
@@ -15,7 +15,7 @@ This is my first relatively serious JavaScript and CSS code beyond simple script
 
 All in all, I wouldn't use it "in production" as is.
 
-I have not found a library that is easily integratable in a standalone HTML page (through a CDN or otherwise), so I ended up implementing my own library ~~with blackjack and hookers~~. The intention was to make the code very small so you can copy paste it directly into your HTML. Main idea was to use CSS whenever possible, so that JS code can be simpler (fewer event handlers, etc.).
+I have not found a library that is easily integratable in a standalone HTML page (through a CDN or otherwise), so I ended up implementing my own library ~~with blackjack and hookers~~. The intention was to make the code very small so you can copy-paste it directly into your HTML. Main idea was to use CSS whenever possible, so that JS code can be simpler (fewer event handlers, etc.).
 
 ## This code is not maintained
 I do not actively maintain this code.
