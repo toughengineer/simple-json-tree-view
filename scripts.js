@@ -114,18 +114,22 @@ function filterItems(pattern, parent, regexpErrorHandler) {
   parent = parent.querySelector('.tree');
   for (var e of parent.querySelectorAll('li.filterShow'))
     e.classList.remove('filterShow');
+  var removeChildren = (parent) => {
+    while (parent.firstChild)
+      parent.removeChild(parent.firstChild);
+  };
   for (var e of parent.querySelectorAll('span[data-key-data] mark:first-child')) {
     e = e.parentElement;
-    e.innerHTML = '';
+    removeChildren(e);
     e.textContent = '"' + e.dataset.keyData + '"';
   }
   for (var e of parent.querySelectorAll('span[data-value-data]  mark:first-child')) {
     e = e.parentElement;
-    e.innerHTML = '';
+    removeChildren(e);
     if (e.className == 'stringValue')
       e.textContent = '"' + e.dataset.valueData + '"'; // does necessary escaping for us
     else
-      e.innerHTML = e.dataset.valueData;
+      e.textContent = e.dataset.valueData;
   }
   if (pattern.length == 0) {
     parent.classList.remove('filter');
