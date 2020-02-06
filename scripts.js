@@ -116,8 +116,20 @@ function createJsonTreeDom(json) {
   holder.className = 'tree';
   impl(json, holder);
   for (var e of holder.querySelectorAll('li.folder > div.key > span')) {
-    e.addEventListener('click', function () {
-      this.parentElement.parentElement.classList.toggle('folded');
+    e.addEventListener('click', function (event) {
+      var parent = this.parentElement.parentElement;
+      var expanded = !parent.classList.toggle('folded');
+      if (event.ctrlKey || event.metaKey) {
+        var children = parent.querySelectorAll('li.folder');
+        if (expanded) {
+          for (var e of children)
+            e.classList.remove('folded');
+        }
+        else {
+          for (var e of children)
+            e.classList.add('folded');
+        }
+      }
     });
   }
   for (var e of holder.querySelectorAll('.tooltip')) {
