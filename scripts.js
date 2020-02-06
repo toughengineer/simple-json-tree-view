@@ -1,96 +1,114 @@
-function escaped(text) {
-  return text.replace(/[&<>]/g, (match) => {
-    switch (match) {
-      case '&': return '&amp;';
-      case '<': return '&lt;';
-      case '>': return '&gt;';
-      //case '"': return '&quot;';  // " is escaped in attributes, otherwise
-      //case '\'': return '&apos;'; // it's not necessary to escape
-    }
-    throw new Error('unexpected match of RegExp');
-  });
-}
-
-
 function createJsonTreeDom(json) {
   function impl(json, parent) {
-    var appendElement = (tag) => {
+    var appendElement = (parent, tag) => {
       var e = document.createElement(tag);
       parent.appendChild(e);
       return e;
     };
+
+    var createElement = (tag, className, textContent) => {
+      var e = document.createElement(tag);
+      e.className = className;
+      if (textContent)
+        e.textContent = textContent;
+      return e;
+    };
+
+    var appendText = (element, text) => {
+      element.appendChild(document.createTextNode(text));
+    }
 
     var jsonEscapeRe = /\\(?:"|\\|b|f|n|r|t|u[0-1a-fA-F]{4})/;
     switch (typeof (json)) {
       case 'boolean':
       case 'number':
         var str = JSON.stringify(json);
-        parent.innerHTML += '<span class="numericValue" data-value-data="' + str + '">' + str + '</span>';
+        var e = createElement('span', 'numericValue', str);
+        e.dataset.valueData = str;
+        parent.appendChild(e);
         break;
       case 'string':
         var str = JSON.stringify(json);
         var str = str.substring(1, str.length - 1);
-        var inner = '<span class="stringValue" data-value-data="' + str.replace(/"/g, '&quot;') + '">"' + escaped(str) + '"</span>';
-        if (jsonEscapeRe.test(str))
-          parent.innerHTML += '<span><span class=tooltip>' + escaped(json) + '</span>' + inner + '</span>';
-        else
-          parent.innerHTML += inner;
+        var inner = createElement('span', 'stringValue', '"' + str + '"');
+        inner.dataset.valueData = str;
+        if (jsonEscapeRe.test(str)) {
+          var tooltip = createElement('span', 'tooltip', json);
+          var outer = document.createElement('span');
+          outer.appendChild(tooltip);
+          outer.appendChild(inner);
+          parent.appendChild(outer);
+        }
+        else {
+          parent.appendChild(inner);
+        }
         break;
       case 'object':
         if (json === null) {
-          parent.innerHTML += '<span class="nullValue" data-value-data="null">null</span>';
+          var e = createElement('span', 'nullValue', 'null');
+          e.dataset.valueData = 'null';
+          parent.appendChild(e);
           break;
         }
+
+        function createNumberOfElementsElement(count) {
+          var e = createElement('span', 'numberOfElements');
+          e.dataset.itemCount = count;
+          return e;
+        }
+
         var isArray = Array.isArray(json);
         if (isArray) {
           if (json.length == 0) {
-            parent.innerHTML += '[]';
+            appendText(parent, '[]');
             break;
           }
-          else {
-            parent.innerHTML += '[';
-            var list = appendElement('ul');
-            var item = null;
-            for (var i = 0; i != json.length; ++i) {
-              if (item)
-                item.innerHTML += ',';
-              item = document.createElement('li');
-              item.innerHTML += '<div class="key"><span></span></div>';
-              impl(json[i], item);
-              list.appendChild(item);
-            }
-            parent.appendChild(list);
-            parent.innerHTML += '<span class="numberOfElements" data-item-count="' + json.length + '"></span>]';
+          appendText(parent, '[');
+          var list = appendElement(parent, 'ul');
+          var item = null;
+          for (var i = 0; i != json.length; ++i) {
+            if (item)
+              appendText(item, ',');
+            item = document.createElement('li');
+            var outer = appendElement(item, 'div');
+            outer.className = 'key';
+            appendElement(outer, 'span');
+            impl(json[i], item);
+            list.appendChild(item);
           }
+          parent.appendChild(createNumberOfElementsElement(json.length));
+          appendText(parent, ']');
         } else {
           var keys = Object.keys(json);
           if (keys.length == 0) {
-            parent.innerHTML += '{}';
+            appendText(parent, '{}');
             break;
           }
-          parent.innerHTML += '{';
-          var list = appendElement('ul');
+          appendText(parent, '{');
+          var list = appendElement(parent, 'ul');
           var item = null;
           for (var key of keys) {
             if (item)
-              item.innerHTML += ',';
+              appendText(item, ',');
             item = document.createElement('li');
-            item.innerHTML += '<div class="key"><span data-key-data="' + key + '">"' + key + '"</span></div>: ';
+            var outer = appendElement(item, 'div');
+            outer.className = 'key';
+            var inner = appendElement(outer, 'span');
+            inner.dataset.keyData = key;
+            inner.textContent = '"' + key + '"';
+            appendText(item, ': ');
             impl(json[key], item);
             list.appendChild(item);
           }
-          parent.appendChild(list);
-          parent.innerHTML += '<span class="numberOfElements" data-item-count="' + keys.length + '"></span>}';
+          parent.appendChild(createNumberOfElementsElement(keys.length));
+          appendText(parent, '}');
         }
         if (parent.tagName == 'LI') {
           parent.classList.add('folder', 'folded');
         }
         break;
-      case 'array':
-        parent.innerHTML += 'compound: ' + JSON.stringify(json);
-        break;
       default:
-        parent.innerHTML += 'unexpected: ' + JSON.stringify(json);
+        appendText(parent, 'unexpected: ' + JSON.stringify(json));
         break;
     }
   };
@@ -104,7 +122,6 @@ function createJsonTreeDom(json) {
   }
   for (var e of holder.querySelectorAll('.tooltip')) {
     e.addEventListener('transitionstart', function (e) {
-      console.log(e);
     });
   }
   return holder;
@@ -144,17 +161,18 @@ function filterItems(pattern, parent, regexpErrorHandler) {
       regexpErrorHandler(e.message);
     return;
   }
-  var getMarkedHTML = (text) => {
+  var appendMarkedHTML = (parent, text) => {
     if (!text)
-      return null;
+      return false;
     var re = new RegExp(pattern, 'gi');
-    var result = '';
     var lastIndex = 0;
     var lastMatch = '';
     var haveNonEmptyMatches = false;
     var appendLastMatchMarked = () => {
       if (lastMatch) {
-        result += '<mark>' + escaped(lastMatch) + '</mark>';
+        var marked = document.createElement('mark');
+        marked.textContent = lastMatch;
+        parent.appendChild(marked);
         lastMatch = '';
         haveNonEmptyMatches = true;
       }
@@ -163,39 +181,44 @@ function filterItems(pattern, parent, regexpErrorHandler) {
     while (match = re.exec(text)) {
       if (lastIndex != match.index) {
         appendLastMatchMarked();
-        result += escaped(text.substring(lastIndex, match.index));
+        parent.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
       }
       lastMatch += match[0];
       lastIndex = re.lastIndex;
     }
     appendLastMatchMarked();
-    if (!haveNonEmptyMatches)
-      return null;
+    if (!haveNonEmptyMatches) {
+      parent.appendChild(document.createTextNode(text));
+      return false;
+    }
     if (text.length != lastIndex)
-      result += escaped(text.substring(lastIndex));
-    return result;
+      parent.appendChild(document.createTextNode(text.substring(lastIndex)));
+    return true;
+  }
+  var appendMarkedHTMLWithQuotes = (parent, text) => {
+    parent.appendChild(document.createTextNode('"'));
+    var hasMarks = appendMarkedHTML(parent, text);
+    parent.appendChild(document.createTextNode('"'));
+    return hasMarks;
   }
 
   for (var e of document.querySelectorAll('.tree li')) {
     var foundName = (() => {
       var nameElement = e.querySelector('div.key > *');
       if (nameElement.dataset.keyData) {
-        var markedHTML = getMarkedHTML(nameElement.dataset.keyData);
-        if (markedHTML) {
-          nameElement.innerHTML = '"' + markedHTML + '"';
-          return true;
-        }
+        removeChildren(nameElement);
+        return appendMarkedHTMLWithQuotes(nameElement, nameElement.dataset.keyData);
       }
       return false;
     })();
     var foundValue = (() => {
       var valueElement = e.querySelector('.stringValue, .numericValue, .nullValue');
       if (valueElement) {
-        var markedHTML = getMarkedHTML(valueElement.dataset.valueData);
-        if (markedHTML) {
-          valueElement.innerHTML = valueElement.className == 'stringValue' ? '"' + markedHTML + '"' : markedHTML;
-          return true;
+        removeChildren(valueElement);
+        if (valueElement.className == 'stringValue') {
+          return appendMarkedHTMLWithQuotes(valueElement, valueElement.dataset.valueData);
         }
+        return appendMarkedHTML(valueElement, valueElement.dataset.valueData);
       }
       return false;
     })();
