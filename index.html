@@ -29,6 +29,17 @@
   </script>
   <p>It can handle relatively large JSONs.</p>
   <p>Ctrl/Meta + click expands or collapses the whole branch.</p>
+  <p>
+    Hover node name and click
+    <span style="display:inline-block;
+                 background-color: #eee;
+                 text-align: center;
+                 width: 1.4em;
+                 line-height: 1.4em;
+                 box-shadow: 0 0 2px;
+                 border-radius: 0.2em;">&#x1F4CB;</span>
+    to copy subtree contents.
+  </p>
   <p>Hover strings with escaped symbols (<code>\" \\ \b \f \n \r \t \uhhhh</code>) to see a tooltip with contents in human readable form.</p>
   <p>
     Filtering:
@@ -88,7 +99,7 @@
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,]
     };
 
-    var tree = createJsonTreeDom(json);
+    var tree = createJsonTreeDom(json, true);
     document.getElementById('test').appendChild(tree);
   </script>
 </body>

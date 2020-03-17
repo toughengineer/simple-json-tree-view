@@ -1,4 +1,4 @@
-function createJsonTreeDom(json) {
+function createJsonTreeDom(json, generateCopyButton = false) {
   function impl(json, parent) {
     var appendElement = (parent, tag) => {
       var e = document.createElement(tag);
@@ -51,6 +51,33 @@ function createJsonTreeDom(json) {
           break;
         }
 
+        function addCopyButton(element, json) {
+          const button = appendElement(element, 'div');
+          button.className = 'copy';
+          button.addEventListener('click', (event) => {
+            const onFail = (e) => {
+              button.classList.add('not-copied');
+              void button.offsetWidth; // triggers animation transitions
+              button.classList.remove('not-copied');
+              console.log('Failed to copy to clipboard: ', e);
+            };
+            try {
+              navigator.clipboard.writeText(JSON.stringify(json, null, '  '))
+                .then(
+                  () => {
+                    button.classList.add('copied');
+                    void button.offsetWidth; // triggers animation transitions
+                    button.classList.remove('copied');
+                  },
+                  onFail
+                );
+            }
+            catch (e) {
+              onFail(e.message);
+            }
+          });
+        }
+
         function createNumberOfElementsElement(count) {
           var e = createElement('span', 'numberOfElements');
           e.dataset.itemCount = count;
@@ -72,8 +99,11 @@ function createJsonTreeDom(json) {
             item = document.createElement('li');
             var outer = appendElement(item, 'div');
             outer.className = 'key';
+            const value = json[i];
             appendElement(outer, 'span');
-            impl(json[i], item);
+            if (generateCopyButton)
+              addCopyButton(outer, value);
+            impl(value, item);
             list.appendChild(item);
           }
           parent.appendChild(createNumberOfElementsElement(json.length));
@@ -93,11 +123,14 @@ function createJsonTreeDom(json) {
             item = document.createElement('li');
             var outer = appendElement(item, 'div');
             outer.className = 'key';
+            const value = json[key];
             var inner = appendElement(outer, 'span');
+            if (generateCopyButton)
+              addCopyButton(outer, value);
             inner.dataset.keyData = key;
             inner.textContent = '"' + key + '"';
             appendText(item, ': ');
-            impl(json[key], item);
+            impl(value, item);
             list.appendChild(item);
           }
           parent.appendChild(createNumberOfElementsElement(keys.length));

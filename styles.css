@@ -38,6 +38,50 @@
     display: inline;
   }
 
+    .tree li > div.key div.copy {
+      display: inline;
+      position: relative;
+    }
+
+    .tree li > div.key .copy::after {
+      content: "\1f4cb";
+      opacity: 0.33;
+      font-size: 1em;
+      background-color: #efefef;
+      visibility: hidden;
+      display: block;
+      position: absolute;
+      color: #111;
+      transition: background-color 0.5s, visibility 0s 0.3s;
+      text-align: center;
+      border-radius: 0.2em;
+      width: 1.4em;
+      height: 1.4em;
+      bottom: -0.2em;
+      left: 0.2em;
+      cursor: pointer;
+    }
+
+    .tree li > div.key .copy:hover::after {
+      opacity: 1;
+      box-shadow: 0 0 3px black;
+    }
+
+    .tree li > div.key:hover .copy::after {
+      visibility: visible;
+      transition: background-color 0.5s, visibility 0s 0.2s;
+    }
+
+    .tree li > div.key:hover .copy.copied::after {
+      background-color: #0c0;
+      transition: background-color 0s;
+    }
+
+    .tree li > div.key:hover .copy.not-copied::after {
+      background-color: #e55;
+      transition: background-color 0s;
+    }
+
     .tree li > div.key > span {
       color: darkslateblue;
     }
