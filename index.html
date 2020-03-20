@@ -21,7 +21,7 @@
         document.getElementById('parseError').textContent = e.message;
         return;
       }
-      var tree = createJsonTreeDom(json);
+      var tree = createJsonTreeDom(json, true);
       var holder = document.getElementById('test');
       holder.removeChild(holder.querySelector('*'));
       holder.appendChild(tree);
