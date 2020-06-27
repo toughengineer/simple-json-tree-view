@@ -2,10 +2,10 @@
 See [demo](https://toughengineer.github.io/simple-json-tree-view/).
 
 This is a simple JSON tree view.
-It has no external dependecies, just plain JavaScript+CSS, it works good in recent Chrome (also tested in Edge).
+It has no external dependecies, just plain JavaScript+CSS, it works well in recent Chrome (also tested in Edge).
 
 Though it is simple, I implemented few capabilities:
-* expaning/collapsing tree items,
+* expanding/collapsing tree items,
 * copyable: expand items to desired configuration, select and copy &mdash; it should be valid JSON (with collapsed items contents omitted),
 * filter items using regex on names and values with highlighting of the matching term,
 * pretty looks: names and values have distinct visual styles, indexes are shown on the left, expand/collapse button is transparent when not hovered.
